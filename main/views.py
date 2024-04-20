@@ -3,12 +3,12 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Product, Comment, Grade
 from .permissions import IsEditor
-from .serializers import AvatarSerializer, ProductImageSerializer, CommentSerializer, GradeSerializer
+from .serializers import AvatarSerializer, ProductImageSerializer, CommentSerializer, GradeSerializer, ProductSerializer
 
 
 class ProductAPIView(generics.ListAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductImageSerializer
+    serializer_class = ProductSerializer
     authentication_classes = []
     permission_classes = []
 
