@@ -17,7 +17,6 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['my_comment']
 class ProductImageSerializer(serializers.ModelSerializer):
 
-
     class Meta:
         model = ProductImage
         fields = ['my_image']
