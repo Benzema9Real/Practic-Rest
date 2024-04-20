@@ -13,18 +13,19 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
-    image = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='image')
-    my_image = models.ImageField(upload_to='images/',blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    my_image = models.ImageField(upload_to='images/', blank=True)
 
 
 class Comment(models.Model):
+    comment = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comment')
+    my_comment = models.TextField('Комментарий')
 
-    comment = models.TextField('Комментарий')
 
 
-
-class Comment(models.Model):
-    grade = models.IntegerField('оценка от 1 до 5', validators=[MaxValueValidator(5),MinValueValidator(1)])
+class Grade(models.Model):
+    grade = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='grade')
+    my_grade = models.IntegerField('оценка от 1 до 5', validators=[MaxValueValidator(5),MinValueValidator(1)])
 
 class Avatar(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='avatar')
@@ -32,3 +33,7 @@ class Avatar(models.Model):
     country = models.CharField('Страна', max_length=100, blank=True)
     region = models.CharField('Область', max_length=100, blank=True)
     place_of_birth = models.CharField('Место рождения', max_length=200, blank=True)
+
+
+
+

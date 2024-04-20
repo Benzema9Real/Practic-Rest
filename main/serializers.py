@@ -1,21 +1,23 @@
 from django.contrib.auth.hashers import make_password
-from .models import User
+from django.contrib.auth.models import User
+
 from rest_framework import serializers
 
-from .models import Product, Avatar, ProductImage
+from .models import Product, Avatar, ProductImage, Comment, Grade
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['name','category','summary','full_content','price','quantity']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+
     class Meta:
         model = ProductImage
-        fields = ['image', 'my_image','product']
+        fields = ['product', 'my_image']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -39,3 +41,15 @@ class AvatarSerializer(serializers.ModelSerializer):
         user = User.objects.create(**user_data)
         avatar = Avatar.objects.create(user=user, **validated_data)
         return avatar
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['product', 'comment']
+
+
+class GradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grade
+        fields = ['product', 'grade']

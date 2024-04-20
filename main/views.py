@@ -1,12 +1,9 @@
 from django.contrib.auth.models import User
-from django.shortcuts import render
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
-from .models import Product
-from .serializers import ProductSerializer, AvatarSerializer, ProductImageSerializer
+from .models import Product, Comment, Grade
+from .permissions import IsEditor
+from .serializers import AvatarSerializer, ProductImageSerializer, CommentSerializer, GradeSerializer
 
 
 class ProductAPIView(generics.ListAPIView):
@@ -31,3 +28,16 @@ class UserRegistrationView(generics.CreateAPIView):
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentAPIView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    authentication_classes = []
+    permission_classes = []
+
+class GradeAPIView(generics.ListCreateAPIView):
+    queryset = Grade.objects.all()
+    serializer_class = GradeSerializer
+    authentication_classes = []
+    permission_classes = []
