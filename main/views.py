@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import generics, status
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from .models import Product, Comment, Grade
-from .permissions import IsEditor
+from .permissions import Editor
 from .serializers import AvatarSerializer, ProductImageSerializer, CommentSerializer, GradeSerializer, ProductSerializer
 
 
@@ -40,4 +41,9 @@ class GradeAPIView(generics.ListCreateAPIView):
     queryset = Grade.objects.all()
     serializer_class = GradeSerializer
     authentication_classes = []
+    permission_classes = []
+
+class EditorViewSet(RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     permission_classes = []

@@ -11,27 +11,41 @@ class GradeSerializer(serializers.ModelSerializer):
         model = Grade
         fields = ['my_grade']
 
+
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['my_comment']
-class ProductImageSerializer(serializers.ModelSerializer):
+        fields = '__all__'
 
+
+class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
         fields = ['my_image']
 
+
 class ProductSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
-    grade = serializers.PrimaryKeyRelatedField(queryset=Grade.objects.all())
-    comment = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all())
+    grade = serializers.SerializerMethodField()
+    comment = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
-        fields = ['name','category','summary','full_content','price','quantity','image_url','comment','grade']
+        fields = ['name', 'category', 'summary', 'full_content', 'price', 'quantity', 'image_url', 'comment', 'grade']
 
     def get_image_url(self, obj):
-        product_image = obj.images.first()  # Получаем первое изображение товара
+        product_image = obj.images.first()
         return product_image.my_image.url if product_image else None
+
+    def get_grade(self, obj):
+        product_grade = obj.grade.first()
+        return product_grade.my_grade if product_grade else None
+
+    def get_comment(self, obj):
+        product_comment = obj.comment.first()
+        return product_comment.my_comment if product_comment else None
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -53,12 +67,3 @@ class AvatarSerializer(serializers.ModelSerializer):
         user = User.objects.create(**user_data)
         avatar = Avatar.objects.create(user=user, **validated_data)
         return avatar
-
-
-
-
-
-class GradeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Grade
-        fields = ['product', 'grade']
