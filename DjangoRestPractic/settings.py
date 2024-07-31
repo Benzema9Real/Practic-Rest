@@ -145,10 +145,12 @@ SIMPLE_JWT = {
 }
 
 # settings.py
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.timeweb.ru'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+EMAIL_PORT = 465  # Порт для SSL
+EMAIL_USE_TLS = False  # Выключение TLS
+EMAIL_USE_SSL = True  # Включение SSL
 EMAIL_HOST_USER = 'sendemail@fund4.pro'
 EMAIL_HOST_PASSWORD = 'szd7QAFu'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
