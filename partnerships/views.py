@@ -1,13 +1,12 @@
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from rest_framework import generics, serializers, status, permissions
+from rest_framework import generics, status, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from .serializers import RegisterSerializer, ProfileSerializer, ProductSerializer, \
     ProductAllSerializer, ContactSupplierSerializer
-from .models import Profile, Product, Message
+from .models import Profile, Product
 from .permissions import IsSupplier, IsBuyer
 
 
@@ -29,7 +28,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):  # Профиль
 class ProductCreateView(generics.CreateAPIView):  # Создание
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSupplier]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -40,7 +39,16 @@ class ProductCreateView(generics.CreateAPIView):  # Создание
         return Product.objects.all()
 
 
-class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):  # Личный кабинет
+class ProductDetailUpdateView(generics.RetrieveUpdateDestroyAPIView):  # Личный кабинет
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsSupplier, IsAuthenticated]
+
+    def get_queryset(self):
+        return Product.objects.filter(user=self.request.user)
+
+
+class ProductDetailView(generics.RetrieveAPIView):  # Личный кабинет
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsSupplier, IsAuthenticated]
@@ -57,6 +65,8 @@ class ProductDetailAllView(generics.RetrieveAPIView):  # Detail
 
 class ContactSupplierView(APIView):
     serializer_class = ContactSupplierSerializer
+    permission_classes = [IsAuthenticated, IsBuyer]
+
     def post(self, request, pk):
         try:
             product = Product.objects.get(pk=pk, activate=True)
