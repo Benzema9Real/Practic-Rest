@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from .models import Service
 from django.conf import settings
@@ -14,7 +15,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
 
-User = get_user_model()
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -71,3 +72,10 @@ class MessageSerializer(serializers.ModelSerializer):
             recipient_list,
             fail_silently=False,
         )
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['type', 'transport_included', 'business_name', 'business_description', 'business_website']
+        ref_name = 'ProfileSerializerService'

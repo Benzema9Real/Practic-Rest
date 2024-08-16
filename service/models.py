@@ -26,11 +26,13 @@ class Service(models.Model):
 class Company(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user')
     CHOICE = [
-        ('company', 'Я бизнесмен, который предоставляет услуги'),
-        ('man', 'Я бизнесмен, который ищу бизнес услуги')
+        ('company', 'Я подрядчик '),
+        ('man', 'Я заказчик')
     ]
     type = models.CharField(max_length=300, choices=CHOICE)
-
+    business_name = models.CharField(max_length=100, blank=True, null=True)
+    business_description = models.TextField(blank=True, null=True)
+    business_website = models.URLField(blank=True, null=True)
     def save(self, *args, **kwargs):
         if self.pk is None:
             if self.type == 'company':
@@ -46,7 +48,7 @@ class Company(models.Model):
 
 class Message(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services_sent_messages')
     sender_name = models.CharField(max_length=255)
     sender_email = models.EmailField()
     content = models.TextField('Message Content')

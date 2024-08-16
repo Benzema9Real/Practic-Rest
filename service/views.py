@@ -1,15 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .serializers import CompanySerializer, MessageSerializer, ServiceSerializer
+from .serializers import CompanySerializer, MessageSerializer, ServiceSerializer, ProfileSerializer
 from .permissions import IsCompany
-from .models import Service, Message
+from .models import Service, Message, Company
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
-from .permissions import IsPerson
 
 
- # Создание услуги
-class ServiceView(generics.CreateAPIView):
+   # Создание услуги
+class ServiceCreateView(generics.CreateAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
 
@@ -35,7 +34,7 @@ class UserRegistrationView(generics.CreateAPIView):  # регистрация
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserServiceListView(generics.ListAPIView):   # Личный кабинет
+class UserServiceListView(generics.ListAPIView):  # Личный кабинет
     serializer_class = ServiceSerializer
     permission_classes = [permissions.IsAuthenticated, IsCompany]
 
@@ -45,7 +44,7 @@ class UserServiceListView(generics.ListAPIView):   # Личный кабинет
 
 class ServiceListView(generics.ListAPIView):  # Общий лист услуг
     serializer_class = ServiceSerializer
-    permission_classes = [permissions.IsAuthenticated, IsPerson]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Service.objects.filter(activate=True)
@@ -58,3 +57,11 @@ class MessageCreateView(generics.CreateAPIView):  # Отправка по email
 
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
+
+
+class ProfileView(generics.RetrieveUpdateAPIView):  # Профиль
+    queryset = Company.objects.all()
+    serializer_class = ProfileSerializer
+
+    def get_object(self):
+        return self.request.user.profile
