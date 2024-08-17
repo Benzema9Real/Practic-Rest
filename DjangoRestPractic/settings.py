@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'partnerships',
+
     'service',
     'rest_framework',
     'rest_framework_simplejwt',

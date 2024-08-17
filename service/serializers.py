@@ -4,78 +4,71 @@ from django.core.mail import send_mail
 from .models import Service
 from django.conf import settings
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Company, Message
+from .models import Profile, Type, Contact
 
 
-class ServiceSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Service
-        fields = ['id', 'type', 'title', 'email', 'description', 'company', 'created_at']
+        model = Profile
+        fields = ['business_name', 'business_description', 'business_website']
+        ref_name = 'ProfileSerializerService'
         read_only_fields = ['user']
-
-
-
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password']
+        ref_name = 'UserSerializerService'
         extra_kwargs = {'password': {'write_only': True}}
 
 
-class CompanySerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['id', 'name', 'description', 'type', 'email', 'price', 'created_at', 'updated_at']
+        read_only_fields = ['user']
+        ref_name = 'ServiceSerializerService'
+
+
+class ServiceAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['id', 'name', 'description', 'type', 'email', 'price', 'created_at', 'updated_at']
+        ref_name = 'ServiceAllSerializerService'
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    role = serializers.ChoiceField(choices=Profile.CHOICE, write_only=True)
+    business_name = serializers.CharField(required=False, allow_blank=True)
+    business_description = serializers.CharField(required=False, allow_blank=True)
+    business_website = serializers.URLField(required=False, allow_blank=True)
 
     class Meta:
-        model = Company
-        fields = ['user', 'type']
+        model = User
+        fields = ['username', 'email', 'password', 'role', 'business_name', 'business_description', 'business_website'
+                  ]
+        extra_kwargs = {'password': {'write_only': True}}
+        ref_name = 'ServiceRegisterSerializer'
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
+        role = validated_data.pop('role')
+        business_name = validated_data.pop('business_name', '')
+        business_description = validated_data.pop('business_description', '')
+        business_website = validated_data.pop('business_website', '')
 
-        # Хеширование пароля перед сохранением
-        user_data['password'] = make_password(user_data['password'])
-        user = User.objects.create(**user_data)
-        user = Company.objects.create(user=user, **validated_data)
+        user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user, role=role, business_name=business_name,
+                               business_description=business_description, business_website=business_website,
+                               )
         return user
 
 
-class MessageSerializer(serializers.ModelSerializer):
-    sender_name = serializers.CharField(max_length=255, required=True)
-    sender_email = serializers.EmailField(required=True)
-
+class ContactSupplierSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    email = serializers.EmailField()
+    message = serializers.CharField(max_length=1000)
     class Meta:
-        model = Message
-        fields = ['service', 'content', 'sender_name', 'sender_email']
-
-    def create(self, validated_data):
-        sender_name = validated_data.pop('sender_name')
-        sender_email = validated_data.pop('sender_email')
-        message = super().create(validated_data)
-
-        # Отправка почты
-        self.send_email(message.service, sender_name, sender_email, message.content)
-
-        return message
-
-    def send_email(self, service, sender_name, sender_email, message_content):
-        subject = f'New message from {sender_name}'
-        message = f'Sender Name: {sender_name}\nSender Email: {sender_email}\n\nMessage:\n{message_content}'
-        recipient_list = [service.email]
-
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            recipient_list,
-            fail_silently=False,
-        )
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = ['type', 'transport_included', 'business_name', 'business_description', 'business_website']
-        ref_name = 'ProfileSerializerService'
+        model = Contact
+        fields = '__all__'
+        ref_name = 'ContactSerializerService'

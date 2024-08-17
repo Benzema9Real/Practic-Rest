@@ -11,31 +11,32 @@ class Type(models.Model):
 
 class Service(models.Model):
     type = models.ForeignKey(Type, on_delete=models.CASCADE, related_name='type')
-    title = models.CharField('Название услуги', max_length=255)
+    name = models.CharField('Название услуги', max_length=255)
     description = models.TextField('Описание')
     email = models.EmailField()
-    company = models.CharField('Название компании', max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     activate = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services')
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
-class Company(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user')
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     CHOICE = [
         ('company', 'Я подрядчик '),
         ('man', 'Я заказчик')
     ]
-    type = models.CharField(max_length=300, choices=CHOICE)
+    role = models.CharField(max_length=300, choices=CHOICE)
     business_name = models.CharField(max_length=100, blank=True, null=True)
     business_description = models.TextField(blank=True, null=True)
     business_website = models.URLField(blank=True, null=True)
     def save(self, *args, **kwargs):
         if self.pk is None:
-            if self.type == 'company':
+            if self.role == 'company':
                 group = Group.objects.get(name='Company')
             else:
                 group = Group.objects.get(name='Person')
@@ -43,16 +44,11 @@ class Company(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.type
+        return self.role
 
 
-class Message(models.Model):
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services_sent_messages')
-    sender_name = models.CharField(max_length=255)
-    sender_email = models.EmailField()
-    content = models.TextField('Message Content')
-    sent_at = models.DateTimeField(auto_now_add=True)
+class Contact(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    message = models.CharField(max_length=1000)
 
-    def __str__(self):
-        return f"Message from {self.sender_name} to {self.service.company}"
