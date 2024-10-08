@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
 
-    'service',
+    'registration',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
